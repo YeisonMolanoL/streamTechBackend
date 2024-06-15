@@ -39,8 +39,8 @@ public class AccountTypeService {
         this.accountTypeRepository.save(accountTypeRecordFound.get());
     }
 
-    public AccountTypeRecord getAccountTypeById(long accountId) throws Exception {
-        return this.accountTypeRepository.findById(accountId).orElseThrow(() -> new Exception("Error al encontrar la cuenta con id: {"+ accountId + "}"));
+    public AccountTypeRecord getAccountTypeById(long accountId) {
+        return this.accountTypeRepository.findById(accountId).orElseThrow(() -> new StreamTechException(ErrorMessages.ACCOUNT_TYPE_NOT_FOUND));
     }
 
     public void softDeleteAccountType(long accountId) throws Exception {

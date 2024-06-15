@@ -6,9 +6,9 @@ import lombok.Data;
 import java.util.Date;
 
 @Entity
-@Table(name = "AccountSales")
+@Table(name = "ProfileSales")
 @Data
-public class AccountSalesRecord {
+public class ProfileSalesRecord {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long accountSaleId;

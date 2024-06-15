@@ -3,6 +3,7 @@ package com.TechPulseInnovations.streamTech.app.modells;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 @Entity
@@ -17,8 +18,8 @@ public class AccountRecord {
     private boolean accountStatusAcount;
     private boolean accountStatusSale;
     private boolean accountProperty;
-    private Date accountDueDate;
-    private Date accountPurchaseDate;
+    private LocalDate accountDueDate;
+    private LocalDate accountPurchaseDate;
     private int accountAvailableProfiles;
     @ManyToOne
     private AccountTypeRecord accountTypeRecord;

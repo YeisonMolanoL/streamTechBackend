@@ -59,8 +59,20 @@ public class AccountController {
         return this.accountService.getAllByType(accountTypeId);
     }
 
-    @PostMapping(GET_AVAILABLE)
+    @PostMapping(GET_AVAILABLE_BY_ACCOUNT)
     public Page<AccountRecord> getAvailableByAccountType(@RequestBody AccountTypeRecord accountTypeRecord, @RequestParam int page, @RequestParam int pageSize){
+        return this.accountService.getAllByAccountType(accountTypeRecord,page, pageSize);
+    }
+
+    @PostMapping(GET_AVAILABLE)
+    @ResponseStatus(OK)
+    public Page<AccountRecord> getAvailableAccounts(@RequestBody AccountTypeRecord accountTypeRecord, @RequestParam int page, @RequestParam int pageSize){
         return this.accountService.getAllAvailableByAccountType(accountTypeRecord,page, pageSize);
+    }
+
+    @PostMapping(GET_AVAILABLE_FILTER)
+    @ResponseStatus(OK)
+    public Page<AccountRecord> getAvailableAccountsFilter(@RequestBody AccountTypeRecord accountTypeRecord, @RequestParam int page, @RequestParam int pageSize, @RequestParam boolean status){
+        return this.accountService.getAllAvailableByAccountTypeFilter(accountTypeRecord,page, pageSize, status);
     }
 }

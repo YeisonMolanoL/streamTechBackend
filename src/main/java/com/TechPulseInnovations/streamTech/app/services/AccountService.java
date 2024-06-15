@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,8 +50,8 @@ public class AccountService {
         this.accountRepository.save(accountRecordFound.get());
     }
 
-    public AccountRecord getById(long accountId) throws Exception {
-        return this.accountRepository.findById(accountId).orElseThrow(() -> new Exception("Error al encontrar la cuenta con id: {"+ accountId + "}"));
+    public AccountRecord getById(long accountId) {
+        return this.accountRepository.findById(accountId).orElseThrow(() -> new StreamTechException(ErrorMessages.ACCOUNT_NOT_FOUND));
     }
 
     public void softDelete(long accountId) throws Exception {
@@ -68,8 +69,25 @@ public class AccountService {
         return this.accountRepository.findAllByAccountTypeRecord(accountTypeRecord);
     }
 
-    public Page<AccountRecord> getAllAvailableByAccountType(AccountTypeRecord accountTypeRecord, int page, int pageSize){
+    public Page<AccountRecord> getAllByAccountType(AccountTypeRecord accountTypeRecord, int page, int pageSize){
         Pageable pageable = PageRequest.of(page, pageSize);
         return this.accountRepository.findAllByAccountTypeRecord(accountTypeRecord, pageable);
+    }
+
+    public Page<AccountRecord> getAllAvailableByAccountType(AccountTypeRecord accountTypeRecord, int page, int pageSize){
+        Sort sort = Sort.by(Sort.Direction.ASC, "accountDueDate");
+        Pageable pageable = PageRequest.of(page, pageSize, sort);
+        return this.accountRepository.findAllByAccountTypeRecordAndAccountAvailableProfilesAndAccountStatusSaleFalseAndAccountStatusAcountTrue(accountTypeRecord, pageable, accountTypeRecord.getAccountTypeAmountProfile());
+    }
+
+    public Page<AccountRecord> getAllAvailableByAccountTypeFilter(AccountTypeRecord accountTypeRecord, int page, int pageSize, boolean status){
+        Sort sort = Sort.by(Sort.Direction.ASC, "accountDueDate");
+        Pageable pageable = PageRequest.of(page, pageSize, sort);
+        return this.accountRepository.findAllByAccountTypeRecordAndAccountAvailableProfilesAndAccountStatusSaleFalseAndAccountStatusAcountTrueAndAccountProperty(accountTypeRecord, pageable, accountTypeRecord.getAccountTypeAmountProfile(), status);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void saleAccounts(List<AccountRecord> accountRecords){
+        this.accountRepository.saveAll(accountRecords);
     }
 }
