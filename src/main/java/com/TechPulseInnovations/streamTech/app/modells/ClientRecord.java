@@ -11,4 +11,5 @@ public class ClientRecord {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public long clientId;
     public String name;
+    public String contactNumber;
 }

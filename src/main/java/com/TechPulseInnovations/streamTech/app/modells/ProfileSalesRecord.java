@@ -3,7 +3,7 @@ package com.TechPulseInnovations.streamTech.app.modells;
 import jakarta.persistence.*;
 import lombok.Data;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "ProfileSales")
@@ -11,12 +11,14 @@ import java.util.Date;
 public class ProfileSalesRecord {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long accountSaleId;
-    private String accountSaleProfileName;
-    private int accountSaleProfilePin;
-    private Date accountSaleDueDate;
-    private Date accountSalePurchaseDate;
-    private boolean accountSaleStatus;
+    private long profileSaleId;
+    private String profileSaleName;
+    private String profileSalePin;
+    private LocalDate profileSaleDueDate;
+    private LocalDate profileSalePurchaseDate;
+    private boolean profileSaleStatus;
     @ManyToOne
     private AccountRecord accountRecord;
+    @ManyToOne
+    private ClientRecord clientRecord;
 }

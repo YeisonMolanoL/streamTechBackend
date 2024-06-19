@@ -7,7 +7,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface AccountRepository extends JpaRepository<AccountRecord, Long> {
@@ -20,4 +22,5 @@ public interface AccountRepository extends JpaRepository<AccountRecord, Long> {
 
     Page<AccountRecord> findAllByAccountTypeRecordAndAccountAvailableProfilesAndAccountStatusSaleFalseAndAccountStatusAcountTrue(AccountTypeRecord accountTypeRecord, Pageable pageable, int profileAvailable);
     Page<AccountRecord> findAllByAccountTypeRecordAndAccountAvailableProfilesAndAccountStatusSaleFalseAndAccountStatusAcountTrueAndAccountProperty(AccountTypeRecord accountTypeRecord, Pageable pageable, int profileAvailable, boolean accountProperty);
+    Optional<AccountRecord> findByAccountTypeRecordAndAccountDueDateAfterAndAccountAvailableProfilesGreaterThan(AccountTypeRecord accountTypeRecord, LocalDate currentDate, int availableProfiles);
 }

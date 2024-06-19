@@ -15,4 +15,5 @@ public class AccountTypeRecord {
     private boolean accountTypeStatus;
     private String accountTypeIcon;
     private int accountTypeAmount;
+    private int accountTypeAvailableProfiles;
 }

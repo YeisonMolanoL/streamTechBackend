@@ -6,14 +6,15 @@ import com.TechPulseInnovations.streamTech.app.repository.AccountTypeRepository;
 import com.TechPulseInnovations.streamTech.core.errorException.ErrorMessages;
 import com.TechPulseInnovations.streamTech.core.errorException.StreamTechException;
 import com.TechPulseInnovations.streamTech.core.response.AccountTypeTotalResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
+@Slf4j
 public class AccountTypeService {
     private final AccountTypeRepository accountTypeRepository;
     private final AccountRepository accountRepository;
@@ -28,18 +29,19 @@ public class AccountTypeService {
         this.accountTypeRepository.save(accountTypeRecord);
     }
 
-    public void updateAccountType(long accountId, AccountTypeRecord accountTypeRecord) throws Exception {
-        Optional<AccountTypeRecord> accountTypeRecordFound = this.accountTypeRepository.findById(accountId);
-        if(accountTypeRecordFound.isEmpty()){
-            throw new Exception("Error al encontrar la plataforma con id: {"+ accountId + "}");
-        }
-        accountTypeRecordFound.get().setAccountTypeName(accountTypeRecord.getAccountTypeName());
-        accountTypeRecordFound.get().setAccountTypeAmountProfile(accountTypeRecord.getAccountTypeAmountProfile());
-        accountTypeRecordFound.get().setAccountTypeStatus(accountTypeRecord.isAccountTypeStatus());
-        this.accountTypeRepository.save(accountTypeRecordFound.get());
+    @Transactional(rollbackFor = Exception.class)
+    public void updateAccountType(long accountId, AccountTypeRecord accountTypeRecord) {
+        log.info("AccountTypeService:: updateAccountType accountTypeRecord: {}", accountTypeRecord);
+        AccountTypeRecord accountTypeRecordFound = this.accountTypeRepository.findById(accountId).orElseThrow(() -> new StreamTechException(ErrorMessages.ACCOUNT_TYPE_NOT_FOUND));
+        accountTypeRecordFound.setAccountTypeName(accountTypeRecord.getAccountTypeName());
+        accountTypeRecordFound.setAccountTypeAmountProfile(accountTypeRecord.getAccountTypeAmountProfile());
+        accountTypeRecordFound.setAccountTypeStatus(accountTypeRecord.isAccountTypeStatus());
+        accountTypeRecordFound.setAccountTypeAvailableProfiles(accountTypeRecord.getAccountTypeAvailableProfiles());
+        this.accountTypeRepository.save(accountTypeRecordFound);
     }
 
     public AccountTypeRecord getAccountTypeById(long accountId) {
+        log.info("AccountTypeService:: getAccountTypeById -> accountId: [{}]", accountId);
         return this.accountTypeRepository.findById(accountId).orElseThrow(() -> new StreamTechException(ErrorMessages.ACCOUNT_TYPE_NOT_FOUND));
     }
 

@@ -3,7 +3,7 @@ package com.TechPulseInnovations.streamTech.app.services;
 import com.TechPulseInnovations.streamTech.app.modells.AccountRecord;
 import com.TechPulseInnovations.streamTech.app.modells.AccountTypeRecord;
 import com.TechPulseInnovations.streamTech.app.repository.AccountRepository;
-import com.TechPulseInnovations.streamTech.app.repository.AccountTypeRepository;
+import com.TechPulseInnovations.streamTech.core.enums.AccountStatusSaleEnum;
 import com.TechPulseInnovations.streamTech.core.errorException.ErrorMessages;
 import com.TechPulseInnovations.streamTech.core.errorException.StreamTechException;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +14,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,16 +22,19 @@ import java.util.Optional;
 @Slf4j
 public class AccountService {
     private final AccountRepository accountRepository;
-    private final AccountTypeRepository accountTypeRepository;
-    public AccountService(AccountTypeRepository accountTypeRepository, AccountRepository accountRepository){
+    private final AccountTypeService accountTypeService;
+    public AccountService(AccountTypeService accountTypeService, AccountRepository accountRepository){
         this.accountRepository = accountRepository;
-        this.accountTypeRepository = accountTypeRepository;
+        this.accountTypeService = accountTypeService;
     }
 
     @Transactional(rollbackFor = Exception.class)
     public void createAccount(AccountRecord accountRecord, long accountTypeId){
-        accountRecord.setAccountTypeRecord(this.accountTypeRepository.findById(accountTypeId).orElseThrow(() -> new StreamTechException(ErrorMessages.ACCOUNT_TYPE_NOT_FOUND)));
+        AccountTypeRecord accountTypeRecord = this.accountTypeService.getAccountTypeById(accountTypeId);
+        accountTypeRecord.setAccountTypeAvailableProfiles(accountTypeRecord.getAccountTypeAvailableProfiles() + accountTypeRecord.getAccountTypeAmountProfile());
+        accountRecord.setAccountTypeRecord(this.accountTypeService.getAccountTypeById(accountTypeId));
         this.accountRepository.save(accountRecord);
+        this.accountTypeService.updateAccountType(accountTypeId, accountTypeRecord);
     }
 
     public void updateAccount(long accountId, AccountRecord accountRecord) throws Exception {
@@ -65,7 +69,7 @@ public class AccountService {
     }
 
     public List<AccountRecord> getAllByType(long accountTypeId){
-        AccountTypeRecord accountTypeRecord = this.accountTypeRepository.findById(accountTypeId).orElseThrow(() -> new StreamTechException(ErrorMessages.ACCOUNT_TYPE_NOT_FOUND));
+        AccountTypeRecord accountTypeRecord = this.accountTypeService.getAccountTypeById(accountTypeId);
         return this.accountRepository.findAllByAccountTypeRecord(accountTypeRecord);
     }
 
@@ -89,5 +93,18 @@ public class AccountService {
     @Transactional(rollbackFor = Exception.class)
     public void saleAccounts(List<AccountRecord> accountRecords){
         this.accountRepository.saveAll(accountRecords);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public AccountRecord getAccountRecordsByDueDate(AccountTypeRecord accountTypeRecord) {
+        log.info("AccountService:: getAccountRecordsByDueDate -> accountTypeRecord: [{}]", accountTypeRecord);
+        LocalDate currentDate = LocalDate.now();
+        AccountRecord accountRecord = accountRepository.findByAccountTypeRecordAndAccountDueDateAfterAndAccountAvailableProfilesGreaterThan(accountTypeRecord, currentDate, 0).orElseThrow(() -> new StreamTechException(ErrorMessages.ACCOUNT_PROFILE_AMOUNT_NOT_AVAILABLE));
+        accountRecord.setAccountAvailableProfiles(accountRecord.getAccountAvailableProfiles() - 1);
+        if(accountRecord.getAccountAvailableProfiles() == 0){
+            accountRecord.setAccountStatusSale(true);
+        }
+        this.accountRepository.save(accountRecord);
+        return accountRecord;
     }
 }
