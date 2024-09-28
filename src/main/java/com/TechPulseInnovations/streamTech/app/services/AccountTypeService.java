@@ -18,10 +18,12 @@ import java.util.List;
 public class AccountTypeService {
     private final AccountTypeRepository accountTypeRepository;
     private final AccountRepository accountRepository;
+    private final I18NService i18NService;
 
-    public AccountTypeService(AccountRepository accountRepository, AccountTypeRepository accountTypeRepository){
+    public AccountTypeService(I18NService i18NService, AccountRepository accountRepository, AccountTypeRepository accountTypeRepository){
         this.accountTypeRepository = accountTypeRepository;
         this.accountRepository = accountRepository;
+        this.i18NService = i18NService;
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -32,7 +34,7 @@ public class AccountTypeService {
     @Transactional(rollbackFor = Exception.class)
     public void updateAccountType(long accountId, AccountTypeRecord accountTypeRecord) {
         log.info("AccountTypeService:: updateAccountType accountTypeRecord: {}", accountTypeRecord);
-        AccountTypeRecord accountTypeRecordFound = this.accountTypeRepository.findById(accountId).orElseThrow(() -> new StreamTechException(ErrorMessages.ACCOUNT_TYPE_NOT_FOUND));
+        AccountTypeRecord accountTypeRecordFound = this.accountTypeRepository.findById(accountId).orElseThrow(() -> new StreamTechException(i18NService.getMessage(ErrorMessages.ACCOUNT_TYPE_NOT_FOUND)));
         accountTypeRecordFound.setAccountTypeName(accountTypeRecord.getAccountTypeName());
         accountTypeRecordFound.setAccountTypeAmountProfile(accountTypeRecord.getAccountTypeAmountProfile());
         accountTypeRecordFound.setAccountTypeStatus(accountTypeRecord.isAccountTypeStatus());
@@ -42,7 +44,7 @@ public class AccountTypeService {
 
     public AccountTypeRecord getAccountTypeById(long accountId) {
         log.info("AccountTypeService:: getAccountTypeById -> accountId: [{}]", accountId);
-        return this.accountTypeRepository.findById(accountId).orElseThrow(() -> new StreamTechException(ErrorMessages.ACCOUNT_TYPE_NOT_FOUND));
+        return this.accountTypeRepository.findById(accountId).orElseThrow(() -> new StreamTechException(i18NService.getMessage(ErrorMessages.ACCOUNT_TYPE_NOT_FOUND)));
     }
 
     public void softDeleteAccountType(long accountId) throws Exception {
@@ -60,7 +62,7 @@ public class AccountTypeService {
         AccountTypeTotalResponse accountTypeTotalResponse;
         List<AccountTypeTotalResponse> responseList = new ArrayList<>();
         if(accountsType.isEmpty()){
-            throw new StreamTechException(ErrorMessages.ACCOUNTS_NOT_FOUND);
+            throw new StreamTechException(i18NService.getMessage(ErrorMessages.ACCOUNTS_NOT_FOUND));
         }
         for (AccountTypeRecord accountTypeRecord: accountsType) {
             accountTypeTotalResponse = new AccountTypeTotalResponse();
@@ -71,5 +73,13 @@ public class AccountTypeService {
             responseList.add(accountTypeTotalResponse);
         }
         return responseList;
+    }
+
+    public List<AccountTypeRecord> getAllWithAvailableProfile(){
+        return this.accountTypeRepository.findAllByAccountTypeAvailableProfilesGreaterThan(0);
+    }
+
+    public List<AccountTypeRecord> getAccountsTypeRecords(List<Long> accountTypesId){
+        return this.accountTypeRepository.findByAccountTypeIdIn(accountTypesId);
     }
 }

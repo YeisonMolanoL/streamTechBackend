@@ -24,9 +24,9 @@ public class AccountController {
 
     @PostMapping(CREATE)
     @ResponseStatus(CREATED)
-    public void createAccount(@RequestBody AccountRecord accountRecord, @RequestParam int accountTypeId){
+    public AccountRecord createAccount(@RequestBody AccountRecord accountRecord, @RequestParam int accountTypeId){
         System.out.println(accountRecord);
-        this.accountService.createAccount(accountRecord, accountTypeId);
+        return this.accountService.createAccount(accountRecord, accountTypeId);
     }
 
     @PutMapping(UPDATE)
@@ -74,5 +74,11 @@ public class AccountController {
     @ResponseStatus(OK)
     public Page<AccountRecord> getAvailableAccountsFilter(@RequestBody AccountTypeRecord accountTypeRecord, @RequestParam int page, @RequestParam int pageSize, @RequestParam boolean status){
         return this.accountService.getAllAvailableByAccountTypeFilter(accountTypeRecord,page, pageSize, status);
+    }
+
+    @GetMapping(GET_AVAILABLE_PROFILES)
+    @ResponseStatus(OK)
+    public Page<AccountRecord> getAccountsWithAvailableProfiles(@RequestParam int accountTypeId, @RequestParam int page, @RequestParam int pageSize){
+        return this.accountService.getAccountsWithAvailableProfiles(accountTypeId, page, pageSize);
     }
 }

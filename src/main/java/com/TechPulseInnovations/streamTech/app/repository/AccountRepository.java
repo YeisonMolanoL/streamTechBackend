@@ -13,7 +13,7 @@ import java.util.Optional;
 
 @Repository
 public interface AccountRepository extends JpaRepository<AccountRecord, Long> {
-    Page<AccountRecord> findAllByAccountAvailableProfilesGreaterThanEqual(int cantidad, Pageable pageable);
+    Page<AccountRecord> findAllByAccountTypeRecordAndAccountAvailableProfilesGreaterThanEqual(AccountTypeRecord accountTypeRecord, int cantidad, Pageable pageable);
     Page<AccountRecord> findAllByAccountTypeRecord(AccountTypeRecord accountTypeRecord, Pageable pageable);
     int countByAccountTypeRecord(AccountTypeRecord accountTypeRecord);
     int countByAccountTypeRecordAndAccountPropertyTrue(AccountTypeRecord accountTypeRecord);
@@ -22,5 +22,7 @@ public interface AccountRepository extends JpaRepository<AccountRecord, Long> {
 
     Page<AccountRecord> findAllByAccountTypeRecordAndAccountAvailableProfilesAndAccountStatusSaleFalseAndAccountStatusAcountTrue(AccountTypeRecord accountTypeRecord, Pageable pageable, int profileAvailable);
     Page<AccountRecord> findAllByAccountTypeRecordAndAccountAvailableProfilesAndAccountStatusSaleFalseAndAccountStatusAcountTrueAndAccountProperty(AccountTypeRecord accountTypeRecord, Pageable pageable, int profileAvailable, boolean accountProperty);
-    Optional<AccountRecord> findByAccountTypeRecordAndAccountDueDateAfterAndAccountAvailableProfilesGreaterThan(AccountTypeRecord accountTypeRecord, LocalDate currentDate, int availableProfiles);
+    Optional<AccountRecord> findFirstByAccountTypeRecordAndAccountDueDateAfterAndAccountAvailableProfilesGreaterThan(AccountTypeRecord accountTypeRecord, LocalDate currentDate, int availableProfiles);
+    Optional<AccountRecord> findFirstByAccountTypeRecordAndAccountStatusSaleIsFalseAndAccountAvailableProfilesNotAndAccountDueDateAfterOrderByAccountDueDateAsc(AccountTypeRecord accountTypeRecord, int availableProfiles, LocalDate currentDate);
+    Optional<AccountRecord> findByAccountEmail(String email);
 }

@@ -50,7 +50,7 @@ public class AccountSaleService {
             accountRecord.setAccountAvailableProfiles(0);
             accountSaleRecord.setAccountTypeId(this.accountTypeService.getAccountTypeById(sellByAccountRequest.getAccountTypeId()));
             accountSaleRecord.setClientId(clientRecord);
-            accountSaleRecord.setClientName(clientRecord.getName());
+            accountSaleRecord.setClientName(clientRecord.getClientName());
             accountSaleRecord.setDueDate(sellByAccountRequest.getDueDate());
             accountSaleRecord.setSaleDate(sellByAccountRequest.getSaleDate());
             accountSaleRecord.setAccount(accountRecord);

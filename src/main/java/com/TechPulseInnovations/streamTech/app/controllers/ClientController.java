@@ -6,8 +6,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import static com.TechPulseInnovations.streamTech.core.router.Router.ClientRequestAPI.GET_ALL;
-import static com.TechPulseInnovations.streamTech.core.router.Router.ClientRequestAPI.ROOT;
+import static com.TechPulseInnovations.streamTech.core.router.Router.ClientRequestAPI.*;
+import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
 
 @RestController
@@ -24,5 +24,11 @@ public class ClientController {
     @ResponseStatus(OK)
     public List<ClientRecord> getAll(){
         return this.clientService.getAll();
+    }
+
+    @PostMapping(CREATE)
+    @ResponseStatus(CREATED)
+    public void newClient(@RequestBody ClientRecord clientRecord){
+        this.clientService.newClient(clientRecord);
     }
 }

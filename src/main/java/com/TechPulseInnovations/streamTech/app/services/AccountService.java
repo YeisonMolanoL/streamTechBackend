@@ -23,18 +23,22 @@ import java.util.Optional;
 public class AccountService {
     private final AccountRepository accountRepository;
     private final AccountTypeService accountTypeService;
-    public AccountService(AccountTypeService accountTypeService, AccountRepository accountRepository){
+    private final I18NService i18NService;
+    public AccountService(I18NService i18NService, AccountTypeService accountTypeService, AccountRepository accountRepository){
         this.accountRepository = accountRepository;
         this.accountTypeService = accountTypeService;
+        this.i18NService = i18NService;
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public void createAccount(AccountRecord accountRecord, long accountTypeId){
+    public AccountRecord createAccount(AccountRecord accountRecord, long accountTypeId){
+        log.info("AccountService:: createAccount accountRecord: [{}] accountTypeId: [{}]", accountRecord, accountTypeId);
         AccountTypeRecord accountTypeRecord = this.accountTypeService.getAccountTypeById(accountTypeId);
         accountTypeRecord.setAccountTypeAvailableProfiles(accountTypeRecord.getAccountTypeAvailableProfiles() + accountTypeRecord.getAccountTypeAmountProfile());
         accountRecord.setAccountTypeRecord(this.accountTypeService.getAccountTypeById(accountTypeId));
-        this.accountRepository.save(accountRecord);
+        accountRecord = this.accountRepository.save(accountRecord);
         this.accountTypeService.updateAccountType(accountTypeId, accountTypeRecord);
+        return accountRecord;
     }
 
     public void updateAccount(long accountId, AccountRecord accountRecord) throws Exception {
@@ -55,7 +59,7 @@ public class AccountService {
     }
 
     public AccountRecord getById(long accountId) {
-        return this.accountRepository.findById(accountId).orElseThrow(() -> new StreamTechException(ErrorMessages.ACCOUNT_NOT_FOUND));
+        return this.accountRepository.findById(accountId).orElseThrow(() -> new StreamTechException(i18NService.getMessage(ErrorMessages.ACCOUNT_NOT_FOUND)));
     }
 
     public void softDelete(long accountId) throws Exception {
@@ -99,12 +103,46 @@ public class AccountService {
     public AccountRecord getAccountRecordsByDueDate(AccountTypeRecord accountTypeRecord) {
         log.info("AccountService:: getAccountRecordsByDueDate -> accountTypeRecord: [{}]", accountTypeRecord);
         LocalDate currentDate = LocalDate.now();
-        AccountRecord accountRecord = accountRepository.findByAccountTypeRecordAndAccountDueDateAfterAndAccountAvailableProfilesGreaterThan(accountTypeRecord, currentDate, 0).orElseThrow(() -> new StreamTechException(ErrorMessages.ACCOUNT_PROFILE_AMOUNT_NOT_AVAILABLE));
+        System.out.println("Hasta aca llego");
+        log.info("{}, {}, {}", accountTypeRecord, currentDate, 0);
+        AccountRecord accountRecord = accountRepository.findFirstByAccountTypeRecordAndAccountDueDateAfterAndAccountAvailableProfilesGreaterThan(accountTypeRecord, currentDate, 0).orElseThrow(() -> new StreamTechException(i18NService.getMessage(ErrorMessages.ACCOUNT_PROFILE_AMOUNT_NOT_AVAILABLE)));
+        System.out.println("Hasta aca llego normal");
         accountRecord.setAccountAvailableProfiles(accountRecord.getAccountAvailableProfiles() - 1);
+        System.out.println("Hasta aca llego niormal 2");
         if(accountRecord.getAccountAvailableProfiles() == 0){
             accountRecord.setAccountStatusSale(true);
         }
         this.accountRepository.save(accountRecord);
         return accountRecord;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public AccountRecord getAvailableByCombo(AccountTypeRecord accountTypeRecord){
+        AccountRecord accountRecord = this.accountRepository.findFirstByAccountTypeRecordAndAccountStatusSaleIsFalseAndAccountAvailableProfilesNotAndAccountDueDateAfterOrderByAccountDueDateAsc(accountTypeRecord, 0, LocalDate.now()).orElseThrow(() -> new StreamTechException(i18NService.getMessage(ErrorMessages.ACCOUNT_NOT_AVAILABLE)));
+        accountRecord.setAccountAvailableProfiles(accountRecord.getAccountAvailableProfiles() - 1);
+        if(accountRecord.getAccountAvailableProfiles() == 0){
+            accountRecord.setAccountStatusSale(true);
+        }
+        return this.accountRepository.save(accountRecord);
+    }
+
+    public AccountRecord getByEmail(String email){
+        return this.accountRepository.findByAccountEmail(email).orElseThrow(() -> new StreamTechException(i18NService.getMessage(ErrorMessages.ACCOUNT_NOT_AVAILABLE)));
+    }
+
+    public void transfer(long oldAccount, long newAccount){
+        log.info("AccountService:: transfer oldAccount: [{}], newAccount: [{}]", oldAccount, newAccount);
+        AccountRecord oldAccountRecord = this.getById(oldAccount);
+        AccountRecord newAccountRecord = this.getById(newAccount);
+        oldAccountRecord.setAccountAvailableProfiles(oldAccountRecord.getAccountAvailableProfiles() + 1);
+        newAccountRecord.setAccountAvailableProfiles(newAccountRecord.getAccountAvailableProfiles() - 1);
+        log.info("AccountService:: transfer complete");
+    }
+
+    public Page<AccountRecord> getAccountsWithAvailableProfiles(int accountTypeId, int page, int pageSize){
+        AccountTypeRecord accountTypeRecord = this.accountTypeService.getAccountTypeById(accountTypeId);
+        Sort sort = Sort.by(Sort.Direction.ASC, "accountDueDate");
+        Pageable pageable = PageRequest.of(page, pageSize, sort);
+        return this.accountRepository.findAllByAccountTypeRecordAndAccountAvailableProfilesGreaterThanEqual(accountTypeRecord, 1, pageable);
     }
 }

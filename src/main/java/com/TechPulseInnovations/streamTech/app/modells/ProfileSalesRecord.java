@@ -17,6 +17,9 @@ public class ProfileSalesRecord {
     private LocalDate profileSaleDueDate;
     private LocalDate profileSalePurchaseDate;
     private boolean profileSaleStatus;
+    private String profileSaleType;
+    @ManyToOne
+    private ComboRecord profileComboRecord;
     @ManyToOne
     private AccountRecord accountRecord;
     @ManyToOne

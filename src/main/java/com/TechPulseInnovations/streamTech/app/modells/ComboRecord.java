@@ -4,12 +4,11 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
-@Table(name = "CLIENT_ENTITY")
+@Table(name = "COMBOS")
 @Data
-public class ClientRecord {
+public class ComboRecord {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    public long clientId;
-    public String clientName;
-    public String clientNumber;
+    public long comboId;
+    public String comboName;
 }

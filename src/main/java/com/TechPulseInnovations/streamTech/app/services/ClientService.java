@@ -13,16 +13,24 @@ import java.util.List;
 @Slf4j
 public class ClientService {
     private final ClientRepository clientRepository;
-    public ClientService(ClientRepository clientRepository){
+    private final I18NService i18NService;
+    public ClientService(I18NService i18NService, ClientRepository clientRepository) {
         this.clientRepository = clientRepository;
+        this.i18NService = i18NService;
     }
 
     public List<ClientRecord> getAll(){
+        log.info("ClientService:: getAll");
         return this.clientRepository.findAll();
     }
 
     public ClientRecord getById(long clientId){
         log.info("ClientService:: getById -> clientId: [{}]", clientId);
-        return this.clientRepository.findById(clientId).orElseThrow(() -> new StreamTechException(ErrorMessages.CLIENT_NOT_FOUND));
+        return this.clientRepository.findById(clientId).orElseThrow(() -> new StreamTechException(i18NService.getMessage(ErrorMessages.CLIENT_NOT_FOUND)));
+    }
+
+    public void newClient(ClientRecord clientRecord){
+        log.info("ClientService:: newClient -> clientRecord: [{}]", clientRecord);
+        this.clientRepository.save(clientRecord);
     }
 }
