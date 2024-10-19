@@ -6,9 +6,11 @@ import com.TechPulseInnovations.streamTech.core.chat.ChatConnection;
 import com.TechPulseInnovations.streamTech.core.enums.ProfileSaleType;
 import com.TechPulseInnovations.streamTech.core.errorException.ErrorMessages;
 import com.TechPulseInnovations.streamTech.core.errorException.StreamTechException;
+import com.TechPulseInnovations.streamTech.core.request.MessageRequest;
 import com.TechPulseInnovations.streamTech.core.request.ProfileSaleRequest;
 import com.TechPulseInnovations.streamTech.core.request.SellByProfileRequest;
 import com.TechPulseInnovations.streamTech.core.request.SellProfilesByAccountRequest;
+import com.TechPulseInnovations.streamTech.core.response.SaleByProfileResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,32 +41,48 @@ public class ProfileSalesService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public void createProfileSale(List<SellByProfileRequest> profilesSalesRequest){
+    public List<SaleByProfileResponse> createProfileSale(List<SellByProfileRequest> profilesSalesRequest){
         log.info("ProfileSalesService:: createAccountSales profilesSalesRequest: [{}]", profilesSalesRequest);
         List<ProfileSalesRecord> profileSalesRecords = new ArrayList<>();
+        List<SaleByProfileResponse> saleByProfileResponses = new ArrayList<>();
         AccountTypeRecord accountTypeRecord;
         AccountRecord accountRecord;
+        SaleByProfileResponse saleByProfileResponse;
         ProfileSalesRecord profileSalesRecord;
+        ClientRecord clientRecord;
         for (SellByProfileRequest sellByAccountRequest : profilesSalesRequest) {
             accountTypeRecord = this.accountTypeService.getAccountTypeById(sellByAccountRequest.getAccountTypeId());
-            accountTypeRecord.setAccountTypeAvailableProfiles(accountTypeRecord.getAccountTypeAvailableProfiles() - 1);
             accountRecord = this.accountService.getAccountRecordsByDueDate(accountTypeRecord);
             profileSalesRecord = new ProfileSalesRecord();
+            clientRecord = this.clientService.getById(sellByAccountRequest.getClientId());
+            saleByProfileResponse = new SaleByProfileResponse();
+            saleByProfileResponse.setProfileSaleName(sellByAccountRequest.getProfileSaleName());
+            saleByProfileResponse.setProfileSalePin(sellByAccountRequest.getProfileSalePin());
+            saleByProfileResponse.setProfileSaleDueDate(sellByAccountRequest.getProfileSaleDueDate());
+            saleByProfileResponse.setProfileSalePurchaseDate(sellByAccountRequest.getProfileSalePurchaseDate());
+            saleByProfileResponse.setAccountEmail(accountRecord.getAccountEmail());
+            saleByProfileResponse.setClientName(clientRecord.getClientName());
+            saleByProfileResponse.setClientNumber(clientRecord.getClientNumber());
+            saleByProfileResponse.setAccountTypeName(accountTypeRecord.getAccountTypeName());
             profileSalesRecord.setProfileSaleName(sellByAccountRequest.getProfileSaleName());
             profileSalesRecord.setProfileSalePin(sellByAccountRequest.getProfileSalePin());
             profileSalesRecord.setProfileSaleDueDate(sellByAccountRequest.getProfileSaleDueDate());
-            profileSalesRecord.setProfileSalePurchaseDate(sellByAccountRequest.getProfileSaleDueDate());
-            profileSalesRecord.setClientRecord(this.clientService.getById(sellByAccountRequest.getClientId()));
+            profileSalesRecord.setProfileSalePurchaseDate(sellByAccountRequest.getProfileSalePurchaseDate());
+            profileSalesRecord.setClientRecord(clientRecord);
             profileSalesRecord.setAccountRecord(accountRecord);
             profileSalesRecord.setProfileSaleType(ProfileSaleType.UNIDAD.name());
             profileSalesRecords.add(profileSalesRecord);
             this.profileSalesRepository.save(profileSalesRecord);
-            this.chatConnection.sendMessage("Hola querido Yeison tu perfil de ".concat(accountTypeRecord.getAccountTypeName()).concat(" quedo con el nombre ".
-                    concat(profileSalesRecord.getProfileSaleName()).concat(" y con el pin ").concat(profileSalesRecord.getProfileSalePin())
-                    .concat(" recuerda que vence el dia ").concat(profileSalesRecord.getProfileSaleDueDate().toString())), "3209851930");
+            saleByProfileResponses.add(saleByProfileResponse);
+            accountTypeRecord.setAccountTypeAvailableProfiles(accountTypeRecord.getAccountTypeAvailableProfiles() - 1);
+            log.info("ProfileSalesService:: entro a editar accountTypeRecord: [{}]", accountTypeRecord);
             this.accountTypeService.updateAccountType(accountTypeRecord.getAccountTypeId(), accountTypeRecord);
         }
-        //this.profileSalesRepository.saveAll(profileSalesRecords);
+        return saleByProfileResponses;
+    }
+
+    public void sendMessage(String message, String clientNumber){
+        this.chatConnection.sendMessage(message, clientNumber);
     }
 
     @Transactional(rollbackFor = Exception.class)

@@ -4,6 +4,7 @@ import com.TechPulseInnovations.streamTech.app.modells.ProfileSalesRecord;
 import com.TechPulseInnovations.streamTech.app.services.ProfileSalesService;
 import com.TechPulseInnovations.streamTech.core.request.SellByProfileRequest;
 import com.TechPulseInnovations.streamTech.core.request.SellProfilesByAccountRequest;
+import com.TechPulseInnovations.streamTech.core.response.SaleByProfileResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,9 +26,9 @@ public class ProfileSalesController {
 
     @PostMapping(CREATE)
     @ResponseStatus(CREATED)
-    public void createAccountSales(@RequestBody List<SellByProfileRequest> profileSalesRequest){
+    public List<SaleByProfileResponse> createAccountSales(@RequestBody List<SellByProfileRequest> profileSalesRequest){
         log.info("ProfileSalesController:: createAccountSales profileSalesRequest: {}", profileSalesRequest);
-        this.profileSalesService.createProfileSale(profileSalesRequest);
+        return this.profileSalesService.createProfileSale(profileSalesRequest);
     }
 
     @PutMapping(UPDATE)

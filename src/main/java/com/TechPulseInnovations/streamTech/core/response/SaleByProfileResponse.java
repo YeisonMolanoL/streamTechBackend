@@ -1,18 +1,17 @@
-package com.TechPulseInnovations.streamTech.core.request;
+package com.TechPulseInnovations.streamTech.core.response;
 
 import lombok.Data;
 
 import java.time.LocalDate;
-import java.util.List;
 
 @Data
-public class SellByProfileRequest {
-    public long accountTypeId;
+public class SaleByProfileResponse {
     public String accountTypeName;
-    public long clientId;
+    public String clientName;
+    public String clientNumber;
     public LocalDate profileSaleDueDate;
     public String profileSaleName;
     public String profileSalePin;
     public LocalDate profileSalePurchaseDate;
-    public String message;
+    public String accountEmail;
 }
