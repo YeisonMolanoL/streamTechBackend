@@ -11,4 +11,5 @@ public class ComboRecord {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public long comboId;
     public String comboName;
+    public String icon;
 }

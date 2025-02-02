@@ -62,11 +62,22 @@ public class Router {
     public static class ComboSaleRequestAPI{
         public static final String ROOT = "/sale/combo";
         public static final String CREATE = "/create";
+        public static final String INSERT_COMBO = "/insert";
         public static final String UPDATE = "/update";
         public static final String GET_BY_ID = "/{accountId}";
         public static final String SOFT_DELETE = "/{accountId}";
         public static final String GET_ALL = "/all";
         public static final String GET_AVAILABLE = "/available";
         public static final String GET_ALL_BY_TYPE = "/all/type";
+    }
+
+    public static class UsersRequestAPI{
+        public static final String ROOT = "/users";
+        public static final String CREATE = "/create";
+        public static final String LOGIN = "/login";
+        public static final String UPDATE = "/update";
+        public static final String GET_BY_ID = "/{accountId}";
+        public static final String SOFT_DELETE = "/{accountId}";
+        public static final String GET_ALL = "/all";
     }
 }

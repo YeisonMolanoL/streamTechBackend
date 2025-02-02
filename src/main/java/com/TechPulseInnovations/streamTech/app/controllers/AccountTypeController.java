@@ -12,7 +12,7 @@ import static org.springframework.http.HttpStatus.*;
 
 @RestController
 @RequestMapping(ROOT)
-@CrossOrigin(value = {"http://localhost:4200", "http://localhost:8080"})
+@CrossOrigin(origins = "*")
 public class AccountTypeController {
     private final AccountTypeService accountTypeService;
 

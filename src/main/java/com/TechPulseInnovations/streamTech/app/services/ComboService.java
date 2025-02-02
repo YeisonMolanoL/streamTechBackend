@@ -33,15 +33,13 @@ public class ComboService {
     @Transactional(rollbackFor = Exception.class)
     public void newComboSale(ComboSaleRequest comboSaleRequest){
         log.info("ComboService:: newComboSale -> comboSaleRequest: [{}]", comboSaleRequest);
-        ComboRecord comboTemporal = new ComboRecord();
         ComboRecord comboRecord;
-        if(comboSaleRequest.getExistingCombo() == 0){
-            comboTemporal.setComboName(comboSaleRequest.getComboName());
-            comboRecord = this.newCombo(comboTemporal);
-        }else{
-            comboRecord = this.comboRepository.findById(comboSaleRequest.getExistingCombo()).orElseThrow(() -> new StreamTechException(i18NService.getMessage(ErrorMessages.COMBO_NOT_FOUND)));
-        }
-        this.profileSalesService.createComboProfilesSales(comboRecord, comboSaleRequest.getProfileSaleDueDate(), comboSaleRequest.getProfileSalePurchaseDate(), comboSaleRequest.getProfileSaleName(), comboSaleRequest.getProfileSalePin(), comboSaleRequest.getComboAccountsType(), comboSaleRequest.getClientId());
+        comboRecord = this.comboRepository.findById(comboSaleRequest.getExistingCombo()).orElseThrow(
+                () -> new StreamTechException(i18NService.getMessage(ErrorMessages.COMBO_NOT_FOUND)));
+        this.profileSalesService.createComboProfilesSales(comboRecord, comboSaleRequest.getProfileSaleDueDate(),
+                comboSaleRequest.getProfileSalePurchaseDate(), comboSaleRequest.getProfileSaleName(),
+                comboSaleRequest.getProfileSalePin(), comboSaleRequest.getComboAccountsType(),
+                comboSaleRequest.getClientId());
     }
 
     public List<ComboRecord> getAll(){

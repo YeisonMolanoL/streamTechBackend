@@ -15,7 +15,7 @@ import static org.springframework.http.HttpStatus.*;
 @RestController
 @RequestMapping(ROOT)
 @Slf4j
-@CrossOrigin(value = {"http://localhost:4200", "http://localhost:8080"})
+@CrossOrigin(origins = "*")
 public class AccountController {
     private final AccountService accountService;
     public AccountController(AccountService accountService){
