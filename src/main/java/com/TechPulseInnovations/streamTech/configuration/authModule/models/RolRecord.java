@@ -11,5 +11,5 @@ public class RolRecord {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public long id;
     public String name;
-    public boolean enabled;
+    public boolean enabled = true;
 }

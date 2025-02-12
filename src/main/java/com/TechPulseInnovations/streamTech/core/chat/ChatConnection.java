@@ -1,11 +1,11 @@
 package com.TechPulseInnovations.streamTech.core.chat;
-import org.springframework.web.reactive.function.client.WebClient;
+//import org.springframework.web.reactive.function.client.WebClient;
 
 import org.springframework.stereotype.Service;
 
 @Service
 public class ChatConnection {
-    private final WebClient.Builder webClientBuilder;
+    /*private final WebClient.Builder webClientBuilder;
 
     public ChatConnection(WebClient.Builder webClientBuilder){
         this.webClientBuilder = webClientBuilder;
@@ -34,5 +34,5 @@ public class ChatConnection {
             System.out.println("Graves error re peye del servidor: " + e.getMessage());
             return "Error en la solicitud: " + e.getMessage();
         }
-    }
+    }*/
 }

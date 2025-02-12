@@ -2,11 +2,15 @@ package com.TechPulseInnovations.streamTech.configuration.authModule.controllers
 
 import com.TechPulseInnovations.streamTech.app.modells.AccountRecord;
 import com.TechPulseInnovations.streamTech.app.services.AccountService;
+import com.TechPulseInnovations.streamTech.configuration.authModule.core.dto.JwtDto;
+import com.TechPulseInnovations.streamTech.configuration.authModule.core.request.NewUserRequest;
 import com.TechPulseInnovations.streamTech.configuration.authModule.models.UserRecord;
 import com.TechPulseInnovations.streamTech.configuration.authModule.services.UserService;
 import com.TechPulseInnovations.streamTech.core.request.LogInRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.catalina.User;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,17 +27,19 @@ public class UserController {
         this.userService = userService;
     }
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @PostMapping(CREATE)
     @ResponseStatus(CREATED)
-    public UserRecord createAccount(@RequestBody UserRecord accountRecord){
-        System.out.println(accountRecord);
-        return this.userService.createUser(accountRecord);
+    public JwtDto createAccount(@RequestBody NewUserRequest newUserRequest){
+        return this.userService.createUser(newUserRequest);
     }
 
     @PostMapping(LOGIN)
     @ResponseStatus(CREATED)
-    public UserRecord logIn(@RequestBody LogInRequest accountRecord){
-        System.out.println(accountRecord);
+    public JwtDto logIn(@RequestBody LogInRequest accountRecord){
+        System.out.println("soy " + accountRecord);
         return this.userService.logIn(accountRecord);
     }
 

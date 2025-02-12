@@ -82,7 +82,7 @@ public class ProfileSalesService {
     }
 
     public void sendMessage(String message, String clientNumber){
-        this.chatConnection.sendMessage(message, clientNumber);
+        //this.chatConnection.sendMessage(message, clientNumber);
     }
 
     @Transactional(rollbackFor = Exception.class)
