@@ -16,4 +16,6 @@ public class AccountTypeRecord {
     private String accountTypeIcon;
     private int accountTypeAmount;
     private int accountTypeAvailableProfiles;
+    private double profilePrice;
+    private double price;
 }

@@ -43,8 +43,8 @@ public class SecurityConfiguration {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(registry -> {
                     registry.requestMatchers("/users/login", "/users/create").permitAll();
-                    registry.requestMatchers("/admin/**").hasRole("ADMIN");
-                    registry.requestMatchers("/platform/**").hasRole("USER");
+                    registry.requestMatchers("/admin/**").hasAuthority("ADMIN");
+                    registry.requestMatchers("/platform/**").hasAuthority("USER");
                     registry.anyRequest().authenticated();
                 })
                 .httpBasic(Customizer.withDefaults())
