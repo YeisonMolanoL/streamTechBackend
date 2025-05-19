@@ -44,7 +44,7 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(registry -> {
                     registry.requestMatchers("/users/login", "/users/create").permitAll();
                     registry.requestMatchers("/admin/**").hasAuthority("ADMIN");
-                    registry.requestMatchers("/platform/**").hasAuthority("USER");
+                    registry.requestMatchers("/platform/**").hasAnyAuthority("USER", "ADMIN");
                     registry.anyRequest().authenticated();
                 })
                 .httpBasic(Customizer.withDefaults())
