@@ -5,7 +5,7 @@ RUN apk add --no-cache bash gettext
 WORKDIR /app
 
 COPY build/libs/*.jar app.jar
-COPY application.properties .
+COPY src/main/resources/application.properties .
 COPY entrypoint.sh .
 
 RUN chmod +x entrypoint.sh
