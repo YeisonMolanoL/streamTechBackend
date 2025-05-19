@@ -8,6 +8,8 @@ RUN gradle build --no-daemon
 # Stage 2: Run the jar
 FROM eclipse-temurin:17-jdk-alpine
 
+RUN apk add --no-cache bash gettext
+
 WORKDIR /app
 COPY --from=builder /app/build/libs/*.jar app.jar
 COPY src/main/resources/application.properties .
