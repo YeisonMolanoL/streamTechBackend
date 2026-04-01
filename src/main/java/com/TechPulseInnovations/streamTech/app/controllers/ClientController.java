@@ -28,7 +28,7 @@ public class ClientController {
 
     @PostMapping(CREATE)
     @ResponseStatus(CREATED)
-    public void newClient(@RequestBody ClientRecord clientRecord){
-        this.clientService.newClient(clientRecord);
+    public Number newClient(@RequestBody ClientRecord clientRecord){
+        return this.clientService.newClient(clientRecord);
     }
 }

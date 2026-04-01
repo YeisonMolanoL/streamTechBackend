@@ -45,6 +45,10 @@ public class UserService {
 
     @Transactional(rollbackFor = Exception.class)
     public JwtDto createUser(NewUserRequest newUserRequest){
+        boolean isRegisteredUser = this.userRepository.findByUserName(newUserRequest.getUserName()).isPresent();
+        if(isRegisteredUser){
+            throw new StreamTechException(i18NService.getMessage(ErrorMessages.USER_ALREADY_EXIST));
+        }
         String passwordEncode = passwordEncoder.encode(newUserRequest.getPassword());
         try {
         log.info("UserService:: createUser newUserRequest: [{}]", newUserRequest);

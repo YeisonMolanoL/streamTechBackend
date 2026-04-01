@@ -29,8 +29,8 @@ public class ClientService {
         return this.clientRepository.findById(clientId).orElseThrow(() -> new StreamTechException(i18NService.getMessage(ErrorMessages.CLIENT_NOT_FOUND)));
     }
 
-    public void newClient(ClientRecord clientRecord){
+    public Number newClient(ClientRecord clientRecord){
         log.info("ClientService:: newClient -> clientRecord: [{}]", clientRecord);
-        this.clientRepository.save(clientRecord);
+        return this.clientRepository.save(clientRecord).clientId;
     }
 }

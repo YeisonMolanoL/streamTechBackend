@@ -36,14 +36,14 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         try {
         String token = getToken(request);
         if(token != null && jwtProvider.validateToken(token)){
-            String nombreUsuario = jwtProvider.getNombreUsuario(token);
-            UserDetails userDetails = userDetailService.loadUserByUsername(nombreUsuario);
+            String userName = jwtProvider.getUserName(token);
+            UserDetails userDetails = userDetailService.loadUserByUsername(userName);
             UsernamePasswordAuthenticationToken authenticationToken =
                     new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(authenticationToken);
         }
     }catch (Exception e){
-        logger.error("Fail el metodo doFilterInternal " + e.getMessage());
+        logger.error("Fail in the method doFilterInternal " + e.getMessage());
     }
         filterChain.doFilter(request, response);
     }

@@ -1,0 +1,32 @@
+# StreamTech - Backend
+```bash
+    This microservice allows for centralized and secure management of streaming accounts,
+    including Create, Update, Edit, Delete, and Assign operations. It provides a robust REST API
+    to interact with data from external applications, featuring security through Spring Security
+    and JWT (JSON Web Token).
+```
+
+#Technologies
+```bash
+    Java: 17
+    Springboot: 3.2.5
+
+    ### Tools
+    SpringSecurity
+    JWT
+    Spring Data JPA & JDBC
+    Loombok
+    MySql
+```
+
+#  Installtion and Configuration
+```bash
+     1. Clone the project.
+     2. Your environment variables must include:
+         ${DATABASE}: Your database name
+         ${USERNAME}: Your database user
+         ${PASSWORD}: Your database password
+
+         ${SECRET}: Your secret key to generate and sign JWT tokens
+     3. Run your microservice
+```

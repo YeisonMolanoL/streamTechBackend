@@ -14,4 +14,5 @@ public class ErrorMessages {
     public static final String USER_NOT_FOUND = "error.user.not.found";
     public static final String USER_DATA_NOT_FOUND = "error.user-data.not.found";
     public static final String ROLE_NOT_FOUND = "error.rol.not.found";
+    public static final String USER_ALREADY_EXIST = "error.user.already.exist";
 }

@@ -2,7 +2,7 @@ package com.TechPulseInnovations.streamTech.configuration.authModule.services;
 
 import com.TechPulseInnovations.streamTech.configuration.authModule.models.RolRecord;
 import com.TechPulseInnovations.streamTech.configuration.authModule.models.UserRecord;
-import com.TechPulseInnovations.streamTech.configuration.authModule.models.UsuarioPrincipal;
+import com.TechPulseInnovations.streamTech.configuration.authModule.models.PrincipalUser;
 import com.TechPulseInnovations.streamTech.configuration.authModule.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -25,13 +25,11 @@ public class UserDetailService implements UserDetailsService {
         Optional<UserRecord> userRecord = userRepository.findByUserName(username);
 
         if (userRecord.isPresent()) {
-            // Convertir UserRecord a UsuarioPrincipal
             var authorities = userRecord.get().getRoles().stream()
                     .map(rol -> new SimpleGrantedAuthority(rol.getName()))
                     .collect(Collectors.toList());
 
-            // Crear y retornar UsuarioPrincipal
-            return new UsuarioPrincipal(
+            return new PrincipalUser(
                     userRecord.get().getName(),
                     userRecord.get().getUserName(),
                     userRecord.get().getPassword(),

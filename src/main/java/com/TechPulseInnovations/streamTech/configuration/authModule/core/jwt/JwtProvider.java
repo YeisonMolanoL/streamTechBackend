@@ -1,7 +1,6 @@
 package com.TechPulseInnovations.streamTech.configuration.authModule.core.jwt;
 
-import com.TechPulseInnovations.streamTech.configuration.authModule.models.UserRecord;
-import com.TechPulseInnovations.streamTech.configuration.authModule.models.UsuarioPrincipal;
+import com.TechPulseInnovations.streamTech.configuration.authModule.models.PrincipalUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,7 +17,6 @@ import java.security.Key;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 
-import java.util.Base64;
 import java.util.Date;
 
 @Component
@@ -37,35 +35,33 @@ public class JwtProvider {
     }
 
     public String generateToken(Authentication authentication) {
-        UsuarioPrincipal usuarioPrincipal = (UsuarioPrincipal) authentication.getPrincipal();
-        // Crear y firmar el token
+        PrincipalUser usuarioPrincipal = (PrincipalUser) authentication.getPrincipal();
         return Jwts.builder()
-                .setSubject(usuarioPrincipal.getUsername())  // Establecer el nombre de usuario como 'subject'
-                .setIssuedAt(new Date())  // Establecer la fecha de emisión
-                .setExpiration(new Date(new Date().getTime() + expiration * 1000))  // Establecer la expiración
-                .signWith(getSigningKey(), SignatureAlgorithm.HS256)  // Usar la clave secreta generada
-                .compact();  // Generar el token
+                .setSubject(usuarioPrincipal.getUsername())
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(new Date().getTime() + expiration * 1000))
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .compact();
     }
 
-    public String getNombreUsuario(String token) {
+    public String getUserName(String token) {
         byte[] secretBytes = secret.getBytes(StandardCharsets.UTF_8);
         return Jwts.parserBuilder()
-                .setSigningKey(secretBytes)  // Establecer la clave secreta como arreglo de bytes
-                .build()  // Construir el parser
-                .parseClaimsJws(token)  // Parsear el JWT
-                .getBody()  // Obtener el cuerpo de los claims
+                .setSigningKey(secretBytes)
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
                 .getSubject();
     }
 
     public boolean validateToken(String token) {
         try {
-            // Usar parserBuilder para crear el JwtParser
             Jwts.parserBuilder()
-                    .setSigningKey(getSigningKey())  // Establecer la clave
-                    .build()  // Construir el parser
-                    .parseClaimsJws(token);  // Parsear el JWT
+                    .setSigningKey(getSigningKey())
+                    .build()
+                    .parseClaimsJws(token);
 
-            return true;  // El token es válido
+            return true;
         } catch (MalformedJwtException e) {
             logger.error("Token mal formado: " + e.getMessage());
         } catch (UnsupportedJwtException e) {
@@ -77,6 +73,6 @@ public class JwtProvider {
         } catch (SignatureException e) {
             logger.error("Error en la firma");
         }
-        return false;  // El token no es válido
+        return false;
     }
 }

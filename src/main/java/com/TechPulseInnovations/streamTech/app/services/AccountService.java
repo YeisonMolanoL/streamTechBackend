@@ -103,12 +103,8 @@ public class AccountService {
     public AccountRecord getAccountRecordsByDueDate(AccountTypeRecord accountTypeRecord) {
         log.info("AccountService:: getAccountRecordsByDueDate -> accountTypeRecord: [{}]", accountTypeRecord);
         LocalDate currentDate = LocalDate.now();
-        System.out.println("Hasta aca llego");
-        log.info("{}, {}, {}", accountTypeRecord, currentDate, 0);
         AccountRecord accountRecord = accountRepository.findFirstByAccountTypeRecordAndAccountDueDateAfterAndAccountAvailableProfilesGreaterThan(accountTypeRecord, currentDate, 0).orElseThrow(() -> new StreamTechException(i18NService.getMessage(ErrorMessages.ACCOUNT_PROFILE_AMOUNT_NOT_AVAILABLE)));
-        System.out.println("Hasta aca llego normal");
         accountRecord.setAccountAvailableProfiles(accountRecord.getAccountAvailableProfiles() - 1);
-        System.out.println("Hasta aca llego niormal 2");
         if(accountRecord.getAccountAvailableProfiles() == 0){
             accountRecord.setAccountStatusSale(true);
         }

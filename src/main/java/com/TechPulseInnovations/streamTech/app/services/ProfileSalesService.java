@@ -6,7 +6,6 @@ import com.TechPulseInnovations.streamTech.core.chat.ChatConnection;
 import com.TechPulseInnovations.streamTech.core.enums.ProfileSaleType;
 import com.TechPulseInnovations.streamTech.core.errorException.ErrorMessages;
 import com.TechPulseInnovations.streamTech.core.errorException.StreamTechException;
-import com.TechPulseInnovations.streamTech.core.request.MessageRequest;
 import com.TechPulseInnovations.streamTech.core.request.ProfileSaleRequest;
 import com.TechPulseInnovations.streamTech.core.request.SellByProfileRequest;
 import com.TechPulseInnovations.streamTech.core.request.SellProfilesByAccountRequest;
@@ -79,10 +78,6 @@ public class ProfileSalesService {
             this.accountTypeService.updateAccountType(accountTypeRecord.getAccountTypeId(), accountTypeRecord);
         }
         return saleByProfileResponses;
-    }
-
-    public void sendMessage(String message, String clientNumber){
-        //this.chatConnection.sendMessage(message, clientNumber);
     }
 
     @Transactional(rollbackFor = Exception.class)
