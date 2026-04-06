@@ -23,6 +23,12 @@ public class JwtTokenFilter extends OncePerRequestFilter {
     @Autowired
     UserDetailService userDetailService;
 
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        String path = request.getRequestURI();
+        return path.startsWith("/api/code-reception/") || path.equals("/users/login") || path.equals("/users/create");
+    }
+
     private String getToken(HttpServletRequest request){
         String header = request.getHeader("Authorization");
         if(header != null && header.startsWith("Bearer ")) {
