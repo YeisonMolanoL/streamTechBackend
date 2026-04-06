@@ -13,6 +13,7 @@ public class Router {
         public static final String GET_AVAILABLE_FILTER = "/available/filter";
         public static final String GET_ALL_BY_TYPE = "/all/type";
         public static final String GET_AVAILABLE_PROFILES = "/available/profiles";
+        public static final String TOGGLE_IMAP = "/{accountId}/toggle-imap";
     }
 
     public static class ProfileSalesRequestAPI{
@@ -22,7 +23,9 @@ public class Router {
         public static final String GET_BY_ID = "/{accountId}";
         public static final String SOFT_DELETE = "/{accountId}";
         public static final String GET_ALL_BY_ACCOUNT = "/sales";
-        public  static final String UPDATE_BY_ACCOUNT_EMAIL = "/update/im";
+        public static final String GET_BY_EMAIL = "/by-email";
+        public static final String VALIDATE_PIN = "/validate-pin";
+        public static final String UPDATE_BY_ACCOUNT_EMAIL = "/update/im";
         public static final String SELL_PROFILES_BY_ACCOUNT_RECORD = "/by/account";
     }
 

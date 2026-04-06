@@ -1,6 +1,6 @@
 package com.TechPulseInnovations.streamTech.app.controllers;
 
-import com.TechPulseInnovations.streamTech.app.modells.AccountTypeRecord;
+import com.TechPulseInnovations.streamTech.configuration.authModule.configuration.modells.AccountTypeRecord;
 import com.TechPulseInnovations.streamTech.app.services.AccountTypeService;
 import com.TechPulseInnovations.streamTech.core.response.AccountTypeTotalResponse;
 import org.springframework.web.bind.annotation.*;

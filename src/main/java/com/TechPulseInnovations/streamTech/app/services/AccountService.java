@@ -1,10 +1,8 @@
 package com.TechPulseInnovations.streamTech.app.services;
 
-import com.TechPulseInnovations.streamTech.app.modells.AccountRecord;
-import com.TechPulseInnovations.streamTech.app.modells.AccountTypeRecord;
+import com.TechPulseInnovations.streamTech.configuration.authModule.configuration.modells.AccountRecord;
+import com.TechPulseInnovations.streamTech.configuration.authModule.configuration.modells.AccountTypeRecord;
 import com.TechPulseInnovations.streamTech.app.repository.AccountRepository;
-import com.TechPulseInnovations.streamTech.core.enums.AccountStatusSaleEnum;
-import com.TechPulseInnovations.streamTech.core.errorException.ErrorMessages;
 import com.TechPulseInnovations.streamTech.core.errorException.StreamTechException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -24,10 +22,14 @@ public class AccountService {
     private final AccountRepository accountRepository;
     private final AccountTypeService accountTypeService;
     private final I18NService i18NService;
-    public AccountService(I18NService i18NService, AccountTypeService accountTypeService, AccountRepository accountRepository){
+    private final EncryptionService encryptionService;
+    private final ImapManagerService imapManagerService;
+    public AccountService(I18NService i18NService, AccountTypeService accountTypeService, AccountRepository accountRepository, EncryptionService encryptionService, ImapManagerService imapManagerService){
         this.accountRepository = accountRepository;
         this.accountTypeService = accountTypeService;
         this.i18NService = i18NService;
+        this.encryptionService = encryptionService;
+        this.imapManagerService = imapManagerService;
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -36,9 +38,27 @@ public class AccountService {
         AccountTypeRecord accountTypeRecord = this.accountTypeService.getAccountTypeById(accountTypeId);
         accountTypeRecord.setAccountTypeAvailableProfiles(accountTypeRecord.getAccountTypeAvailableProfiles() + accountTypeRecord.getAccountTypeAmountProfile());
         accountRecord.setAccountTypeRecord(this.accountTypeService.getAccountTypeById(accountTypeId));
+        accountRecord.setImapHost("imap.gmail.com");
+        accountRecord.setImapPort(993);
+        accountRecord.setImapSecure(true);
+        accountRecord.setAccountPassword(encryptionService.encrypt(accountRecord.getAccountPassword()));
         accountRecord = this.accountRepository.save(accountRecord);
         this.accountTypeService.updateAccountType(accountTypeId, accountTypeRecord);
+        try {
+            imapManagerService.startListeningForEmail(accountRecord.getAccountEmail());
+        } catch (Exception e) {
+            log.error("Error al iniciar IMAP para la cuenta: {}", accountRecord.getAccountEmail(), e);
+        }
         return accountRecord;
+    }
+
+    public void retryImapConnection(long accountId) {
+        AccountRecord account = getById(accountId);
+        try {
+            imapManagerService.startListeningForEmail(account.getAccountEmail());
+        } catch (Exception e) {
+            log.error("Error al reintentar IMAP para la cuenta: {}", account.getAccountEmail(), e);
+        }
     }
 
     public void updateAccount(long accountId, AccountRecord accountRecord) throws Exception {
@@ -59,7 +79,7 @@ public class AccountService {
     }
 
     public AccountRecord getById(long accountId) {
-        return this.accountRepository.findById(accountId).orElseThrow(() -> new StreamTechException(i18NService.getMessage(ErrorMessages.ACCOUNT_NOT_FOUND)));
+        return this.accountRepository.findById(accountId).orElseThrow(() -> new StreamTechException(i18NService.getMessage("error.account-data.not.found")));
     }
 
     public void softDelete(long accountId) throws Exception {
@@ -103,7 +123,7 @@ public class AccountService {
     public AccountRecord getAccountRecordsByDueDate(AccountTypeRecord accountTypeRecord) {
         log.info("AccountService:: getAccountRecordsByDueDate -> accountTypeRecord: [{}]", accountTypeRecord);
         LocalDate currentDate = LocalDate.now();
-        AccountRecord accountRecord = accountRepository.findFirstByAccountTypeRecordAndAccountDueDateAfterAndAccountAvailableProfilesGreaterThan(accountTypeRecord, currentDate, 0).orElseThrow(() -> new StreamTechException(i18NService.getMessage(ErrorMessages.ACCOUNT_PROFILE_AMOUNT_NOT_AVAILABLE)));
+        AccountRecord accountRecord = accountRepository.findFirstByAccountTypeRecordAndAccountDueDateAfterAndAccountAvailableProfilesGreaterThan(accountTypeRecord, currentDate, 0).orElseThrow(() -> new StreamTechException(i18NService.getMessage("error.account-type-profile.not.found")));
         accountRecord.setAccountAvailableProfiles(accountRecord.getAccountAvailableProfiles() - 1);
         if(accountRecord.getAccountAvailableProfiles() == 0){
             accountRecord.setAccountStatusSale(true);
@@ -114,7 +134,7 @@ public class AccountService {
 
     @Transactional(rollbackFor = Exception.class)
     public AccountRecord getAvailableByCombo(AccountTypeRecord accountTypeRecord){
-        AccountRecord accountRecord = this.accountRepository.findFirstByAccountTypeRecordAndAccountStatusSaleIsFalseAndAccountAvailableProfilesNotAndAccountDueDateAfterOrderByAccountDueDateAsc(accountTypeRecord, 0, LocalDate.now()).orElseThrow(() -> new StreamTechException(i18NService.getMessage(ErrorMessages.ACCOUNT_NOT_AVAILABLE)));
+        AccountRecord accountRecord = this.accountRepository.findFirstByAccountTypeRecordAndAccountStatusSaleIsFalseAndAccountAvailableProfilesNotAndAccountDueDateAfterOrderByAccountDueDateAsc(accountTypeRecord, 0, LocalDate.now()).orElseThrow(() -> new StreamTechException(i18NService.getMessage("error.account.not.available")));
         accountRecord.setAccountAvailableProfiles(accountRecord.getAccountAvailableProfiles() - 1);
         if(accountRecord.getAccountAvailableProfiles() == 0){
             accountRecord.setAccountStatusSale(true);
@@ -123,7 +143,7 @@ public class AccountService {
     }
 
     public AccountRecord getByEmail(String email){
-        return this.accountRepository.findByAccountEmail(email).orElseThrow(() -> new StreamTechException(i18NService.getMessage(ErrorMessages.ACCOUNT_NOT_AVAILABLE)));
+        return this.accountRepository.findByAccountEmail(email).orElseThrow(() -> new StreamTechException(i18NService.getMessage("error.account.not.available")));
     }
 
     public void transfer(long oldAccount, long newAccount){
@@ -140,5 +160,18 @@ public class AccountService {
         Sort sort = Sort.by(Sort.Direction.ASC, "accountDueDate");
         Pageable pageable = PageRequest.of(page, pageSize, sort);
         return this.accountRepository.findAllByAccountTypeRecordAndAccountAvailableProfilesGreaterThanEqual(accountTypeRecord, 1, pageable);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void toggleImapListening(long accountId) {
+        AccountRecord account = getById(accountId);
+        boolean newStatus = !Boolean.TRUE.equals(account.getIsImapActive());
+        account.setIsImapActive(newStatus);
+        accountRepository.save(account);
+        if (newStatus) {
+            imapManagerService.startListeningForEmail(account.getAccountEmail());
+        } else {
+            imapManagerService.stopListeningForEmail(account.getAccountEmail());
+        }
     }
 }

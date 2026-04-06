@@ -1,6 +1,6 @@
 package com.TechPulseInnovations.streamTech.app.services;
 
-import com.TechPulseInnovations.streamTech.app.modells.ClientRecord;
+import com.TechPulseInnovations.streamTech.configuration.authModule.configuration.modells.ClientRecord;
 import com.TechPulseInnovations.streamTech.app.repository.ClientRepository;
 import com.TechPulseInnovations.streamTech.core.errorException.ErrorMessages;
 import com.TechPulseInnovations.streamTech.core.errorException.StreamTechException;

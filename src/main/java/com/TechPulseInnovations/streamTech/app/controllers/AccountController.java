@@ -1,7 +1,7 @@
 package com.TechPulseInnovations.streamTech.app.controllers;
 
-import com.TechPulseInnovations.streamTech.app.modells.AccountRecord;
-import com.TechPulseInnovations.streamTech.app.modells.AccountTypeRecord;
+import com.TechPulseInnovations.streamTech.configuration.authModule.configuration.modells.AccountRecord;
+import com.TechPulseInnovations.streamTech.configuration.authModule.configuration.modells.AccountTypeRecord;
 import com.TechPulseInnovations.streamTech.app.services.AccountService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -80,5 +80,11 @@ public class AccountController {
     @ResponseStatus(OK)
     public Page<AccountRecord> getAccountsWithAvailableProfiles(@RequestParam int accountTypeId, @RequestParam int page, @RequestParam int pageSize){
         return this.accountService.getAccountsWithAvailableProfiles(accountTypeId, page, pageSize);
+    }
+
+    @PutMapping(TOGGLE_IMAP)
+    @ResponseStatus(OK)
+    public void toggleImapListening(@PathVariable long accountId) {
+        this.accountService.toggleImapListening(accountId);
     }
 }

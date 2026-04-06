@@ -1,6 +1,6 @@
 package com.TechPulseInnovations.streamTech.app.controllers;
 
-import com.TechPulseInnovations.streamTech.app.modells.ComboRecord;
+import com.TechPulseInnovations.streamTech.configuration.authModule.configuration.modells.ComboRecord;
 import com.TechPulseInnovations.streamTech.app.services.ComboService;
 import com.TechPulseInnovations.streamTech.core.request.ComboSaleRequest;
 import lombok.extern.slf4j.Slf4j;

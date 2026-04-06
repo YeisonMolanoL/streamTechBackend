@@ -1,0 +1,79 @@
+version: '3.8'
+
+services:
+  # =====================================================
+  # MySQL Database
+  # =====================================================
+  mysql:
+    image: mysql:8.0
+    container_name: streamtech-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: streamtech
+      MYSQL_USER: streamtech_user
+      MYSQL_PASSWORD: streamtech_pass
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./streamTech-back/src/main/resources/sql:/docker-entrypoint-initdb.d
+    networks:
+      - streamtech_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+      interval: 10s
+
+  # =====================================================
+  # Spring Boot Backend
+  # =====================================================
+  backend:
+    build:
+      context: ./streamTech-back
+      dockerfile: Dockerfile
+    container_name: streamtech-backend
+    environment:
+      DATABASE: streamtech
+      USERNAME: streamtech_user
+      PASSWORD: streamtech_pass
+      HOST: mysql
+      SECRET: tu_super_secret_key_muy_largo_para_jwt_aqui_123456789
+      ENCRYPTION_KEY: clave32bytesparaaes256encryptionkey
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/streamtech
+      SPRING_DATASOURCE_USERNAME: streamtech_user
+      SPRING_DATASOURCE_PASSWORD: streamtech_pass
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - streamtech_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/code-reception/health"]
+      timeout: 10s
+      retries: 5
+      interval: 30s
+
+  # =====================================================
+  # Angular Frontend (Optional for dev)
+  # =====================================================
+  # frontend:
+  #   build:
+  #     context: ./streamTech
+  #     dockerfile: Dockerfile
+  #   container_name: streamtech-frontend
+  #   ports:
+  #     - "4200:4200"
+  #   depends_on:
+  #     - backend
+  #   networks:
+  #     - streamtech_network
+
+volumes:
+  mysql_data:
+
+networks:
+  streamtech_network:
+    driver: bridge

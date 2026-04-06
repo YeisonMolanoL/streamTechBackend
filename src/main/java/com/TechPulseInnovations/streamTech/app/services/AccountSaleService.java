@@ -1,9 +1,9 @@
 package com.TechPulseInnovations.streamTech.app.services;
 
-import com.TechPulseInnovations.streamTech.app.modells.AccountRecord;
-import com.TechPulseInnovations.streamTech.app.modells.AccountSaleRecord;
-import com.TechPulseInnovations.streamTech.app.modells.AccountTypeRecord;
-import com.TechPulseInnovations.streamTech.app.modells.ClientRecord;
+import com.TechPulseInnovations.streamTech.configuration.authModule.configuration.modells.AccountRecord;
+import com.TechPulseInnovations.streamTech.configuration.authModule.configuration.modells.AccountSaleRecord;
+import com.TechPulseInnovations.streamTech.configuration.authModule.configuration.modells.AccountTypeRecord;
+import com.TechPulseInnovations.streamTech.configuration.authModule.configuration.modells.ClientRecord;
 import com.TechPulseInnovations.streamTech.app.repository.AccountSaleRepository;
 import com.TechPulseInnovations.streamTech.core.request.SellByAccountRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -12,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Service

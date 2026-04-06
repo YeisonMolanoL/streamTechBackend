@@ -1,9 +1,12 @@
 package com.TechPulseInnovations.streamTech.app.controllers;
 
-import com.TechPulseInnovations.streamTech.app.modells.ProfileSalesRecord;
+import com.TechPulseInnovations.streamTech.configuration.authModule.configuration.modells.ProfileSalesRecord;
 import com.TechPulseInnovations.streamTech.app.services.ProfileSalesService;
 import com.TechPulseInnovations.streamTech.core.request.SellByProfileRequest;
 import com.TechPulseInnovations.streamTech.core.request.SellProfilesByAccountRequest;
+import com.TechPulseInnovations.streamTech.core.request.ValidateProfilePinRequest;
+import com.TechPulseInnovations.streamTech.core.response.ProfilePinValidationResponse;
+import com.TechPulseInnovations.streamTech.core.response.ProfileSaleSelectionResponse;
 import com.TechPulseInnovations.streamTech.core.response.SaleByProfileResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -16,7 +19,7 @@ import static org.springframework.http.HttpStatus.OK;
 
 @RestController
 @RequestMapping(ROOT)
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "http://localhost:4200")
 @Slf4j
 public class ProfileSalesController {
     private final ProfileSalesService profileSalesService;
@@ -56,6 +59,24 @@ public class ProfileSalesController {
     @ResponseStatus(OK)
     public ProfileSalesRecord updateProfileSaleByEmail(@RequestParam long profileSaleId, @RequestParam String email){
         return this.profileSalesService.updateSaleByEmail(profileSaleId, email);
+    }
+
+    @GetMapping(GET_BY_EMAIL)
+    @ResponseStatus(OK)
+    public List<ProfileSaleSelectionResponse> getSalesByEmail(@RequestParam String email){
+        return this.profileSalesService.getSalesByEmail(email);
+    }
+
+    @PostMapping(VALIDATE_PIN)
+    @ResponseStatus(OK)
+    public ProfilePinValidationResponse validateProfilePin(@RequestBody ValidateProfilePinRequest validateProfilePinRequest){
+        return this.profileSalesService.validateProfilePinForEmail(validateProfilePinRequest);
+    }
+
+    @PutMapping("/activate/{profileSaleId}")
+    @ResponseStatus(OK)
+    public void activateProfileSaleAccess(@PathVariable long profileSaleId){
+        this.profileSalesService.markProfileSaleAccessActive(profileSaleId);
     }
 
     @PostMapping(SELL_PROFILES_BY_ACCOUNT_RECORD)

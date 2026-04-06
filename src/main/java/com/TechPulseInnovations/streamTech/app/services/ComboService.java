@@ -1,6 +1,6 @@
 package com.TechPulseInnovations.streamTech.app.services;
 
-import com.TechPulseInnovations.streamTech.app.modells.ComboRecord;
+import com.TechPulseInnovations.streamTech.configuration.authModule.configuration.modells.ComboRecord;
 import com.TechPulseInnovations.streamTech.app.repository.ComboRepository;
 import com.TechPulseInnovations.streamTech.core.errorException.ErrorMessages;
 import com.TechPulseInnovations.streamTech.core.errorException.StreamTechException;

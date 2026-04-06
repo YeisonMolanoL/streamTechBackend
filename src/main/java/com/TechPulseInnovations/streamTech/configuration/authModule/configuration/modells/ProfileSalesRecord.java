@@ -1,4 +1,4 @@
-package com.TechPulseInnovations.streamTech.app.modells;
+package com.TechPulseInnovations.streamTech.configuration.authModule.configuration.modells;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -17,6 +17,10 @@ public class ProfileSalesRecord {
     private LocalDate profileSaleDueDate;
     private LocalDate profileSalePurchaseDate;
     private boolean profileSaleStatus;
+
+    @Column(nullable = false)
+    private Integer profileSaleValidationAccess = 0;
+
     private String profileSaleType;
     @ManyToOne
     private ComboRecord profileComboRecord;

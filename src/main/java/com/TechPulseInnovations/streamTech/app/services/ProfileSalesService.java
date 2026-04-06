@@ -1,7 +1,7 @@
 package com.TechPulseInnovations.streamTech.app.services;
 
-import com.TechPulseInnovations.streamTech.app.modells.*;
 import com.TechPulseInnovations.streamTech.app.repository.ProfileSalesRepository;
+import com.TechPulseInnovations.streamTech.configuration.authModule.configuration.modells.*;
 import com.TechPulseInnovations.streamTech.core.chat.ChatConnection;
 import com.TechPulseInnovations.streamTech.core.enums.ProfileSaleType;
 import com.TechPulseInnovations.streamTech.core.errorException.ErrorMessages;
@@ -9,6 +9,9 @@ import com.TechPulseInnovations.streamTech.core.errorException.StreamTechExcepti
 import com.TechPulseInnovations.streamTech.core.request.ProfileSaleRequest;
 import com.TechPulseInnovations.streamTech.core.request.SellByProfileRequest;
 import com.TechPulseInnovations.streamTech.core.request.SellProfilesByAccountRequest;
+import com.TechPulseInnovations.streamTech.core.request.ValidateProfilePinRequest;
+import com.TechPulseInnovations.streamTech.core.response.ProfilePinValidationResponse;
+import com.TechPulseInnovations.streamTech.core.response.ProfileSaleSelectionResponse;
 import com.TechPulseInnovations.streamTech.core.response.SaleByProfileResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -18,6 +21,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -138,6 +142,54 @@ public class ProfileSalesService {
        return this.profileSalesRepository.getAllByAccountRecord(this.accountService.getById(accountId));
     }
 
+    public List<ProfileSaleSelectionResponse> getSalesByEmail(String email){
+        log.info("ProfileSalesService:: getSalesByEmail email: [{}]", email);
+        AccountRecord accountRecord = this.accountService.getByEmail(email);
+        return this.profileSalesRepository.getAllByAccountRecord(accountRecord)
+            .stream()
+            .map(this::mapToSelectionResponse)
+            .collect(Collectors.toList());
+    }
+
+    public ProfilePinValidationResponse validateProfilePinForEmail(ValidateProfilePinRequest request){
+        log.info("ProfileSalesService:: validateProfilePinForEmail request: [{}]", request);
+        ProfileSalesRecord profileSale = this.getProfileSaleById(request.getProfileSaleId());
+        AccountRecord accountRecord = this.accountService.getByEmail(request.getEmail());
+
+        ProfilePinValidationResponse response = new ProfilePinValidationResponse();
+        response.setProfileSaleValidationAccess(profileSale.getProfileSaleValidationAccess());
+
+        if (profileSale.getAccountRecord() == null || profileSale.getAccountRecord().getAccountId() != accountRecord.getAccountId()) {
+            response.setValid(false);
+            response.setMessage("El correo no está asociado a este perfil");
+            return response;
+        }
+
+        if (profileSale.getProfileSaleValidationAccess() != null && profileSale.getProfileSaleValidationAccess() == 1) {
+            response.setValid(false);
+            response.setMessage("Este perfil ya está activo en un dispositivo. Si desea cambiarlo, contacte al administrador.");
+            return response;
+        }
+
+        if (request.getPin() == null || !request.getPin().equals(profileSale.getProfileSalePin())) {
+            response.setValid(false);
+            response.setMessage("PIN incorrecto");
+            return response;
+        }
+
+        response.setValid(true);
+        response.setMessage("PIN válido");
+        return response;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void markProfileSaleAccessActive(long profileSaleId){
+        log.info("ProfileSalesService:: markProfileSaleAccessActive profileSaleId: [{}]", profileSaleId);
+        ProfileSalesRecord profileSalesRecord = this.getProfileSaleById(profileSaleId);
+        profileSalesRecord.setProfileSaleValidationAccess(1);
+        this.profileSalesRepository.save(profileSalesRecord);
+    }
+
     @Transactional(rollbackFor = Exception.class)
     public ProfileSalesRecord updateSaleByEmail(long profileSaleId, String email){
         log.info("ProfileSalesService:: updateSaleByEmail profileSaleId: [{}] email: [{}]", profileSaleId, email);
@@ -148,6 +200,17 @@ public class ProfileSalesService {
         this.updateProfileSale(profileSalesRecord.getProfileSaleId(), profileSalesRecord);
         log.info("ProfileSalesService:: updateSaleByEmail updated: [{}]", profileSalesRecord);
         return profileSalesRecord;
+    }
+
+    private ProfileSaleSelectionResponse mapToSelectionResponse(ProfileSalesRecord profileSalesRecord){
+        ProfileSaleSelectionResponse response = new ProfileSaleSelectionResponse();
+        response.setProfileSaleId(profileSalesRecord.getProfileSaleId());
+        response.setProfileSaleName(profileSalesRecord.getProfileSaleName());
+        response.setProfileSaleDueDate(profileSalesRecord.getProfileSaleDueDate());
+        response.setProfileSalePurchaseDate(profileSalesRecord.getProfileSalePurchaseDate());
+        response.setProfileSaleStatus(profileSalesRecord.isProfileSaleStatus());
+        response.setProfileSaleValidationAccess(profileSalesRecord.getProfileSaleValidationAccess());
+        return response;
     }
 
     @Transactional(rollbackFor = Exception.class)

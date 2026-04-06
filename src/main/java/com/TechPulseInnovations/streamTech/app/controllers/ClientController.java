@@ -1,6 +1,6 @@
 package com.TechPulseInnovations.streamTech.app.controllers;
 
-import com.TechPulseInnovations.streamTech.app.modells.ClientRecord;
+import com.TechPulseInnovations.streamTech.configuration.authModule.configuration.modells.ClientRecord;
 import com.TechPulseInnovations.streamTech.app.services.ClientService;
 import org.springframework.web.bind.annotation.*;
 

@@ -1,4 +1,4 @@
-package com.TechPulseInnovations.streamTech.app.modells;
+package com.TechPulseInnovations.streamTech.configuration.authModule.configuration.modells;
 
 import jakarta.persistence.*;
 import lombok.Data;

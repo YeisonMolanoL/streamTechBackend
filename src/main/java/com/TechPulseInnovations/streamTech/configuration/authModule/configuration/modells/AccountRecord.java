@@ -1,10 +1,9 @@
-package com.TechPulseInnovations.streamTech.app.modells;
+package com.TechPulseInnovations.streamTech.configuration.authModule.configuration.modells;
 
 import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDate;
-import java.util.Date;
 
 @Entity
 @Table(name = "Account")
@@ -21,6 +20,11 @@ public class AccountRecord {
     private LocalDate accountDueDate;
     private LocalDate accountPurchaseDate;
     private int accountAvailableProfiles;
+    private String imapHost;
+    private Integer imapPort;
+    private Boolean imapSecure;
+    private String connectionError;
+    private Boolean isImapActive;
     @ManyToOne
     private AccountTypeRecord accountTypeRecord;
 }
