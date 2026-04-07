@@ -19,7 +19,6 @@ import static org.springframework.http.HttpStatus.OK;
 
 @RestController
 @RequestMapping(ROOT)
-@CrossOrigin(origins = "http://localhost:4200")
 @Slf4j
 public class ProfileSalesController {
     private final ProfileSalesService profileSalesService;

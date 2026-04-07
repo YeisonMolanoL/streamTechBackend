@@ -14,7 +14,6 @@ import static org.springframework.http.HttpStatus.OK;
 
 @RestController
 @RequestMapping(ROOT)
-@CrossOrigin(origins = "*")
 @Slf4j
 public class ComboController {
     private final ComboService comboService;

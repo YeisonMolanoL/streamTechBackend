@@ -19,7 +19,6 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/api/code-reception")
-@CrossOrigin(origins = "http://localhost:4200", maxAge = 3600)
 @Slf4j
 @RequiredArgsConstructor
 public class CodeReceptionController {

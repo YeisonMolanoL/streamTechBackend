@@ -12,7 +12,6 @@ import static org.springframework.http.HttpStatus.*;
 
 @RestController
 @RequestMapping(ROOT)
-@CrossOrigin(origins = "*")
 public class AccountTypeController {
     private final AccountTypeService accountTypeService;
 

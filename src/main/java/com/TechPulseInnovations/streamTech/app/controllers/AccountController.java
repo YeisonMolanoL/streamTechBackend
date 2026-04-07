@@ -15,7 +15,6 @@ import static org.springframework.http.HttpStatus.*;
 @RestController
 @RequestMapping(ROOT)
 @Slf4j
-@CrossOrigin(origins = "*")
 public class AccountController {
     private final AccountService accountService;
     public AccountController(AccountService accountService){

@@ -17,7 +17,6 @@ import static org.springframework.http.HttpStatus.*;
 @RestController
 @RequestMapping(ROOT)
 @Slf4j
-@CrossOrigin(origins = "*")
 public class UserController {
     private final UserService userService;
     public UserController(UserService userService){

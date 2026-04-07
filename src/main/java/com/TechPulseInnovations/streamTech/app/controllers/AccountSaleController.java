@@ -9,7 +9,6 @@ import static org.springframework.http.HttpStatus.CREATED;
 
 @RestController
 @RequestMapping(ROOT)
-@CrossOrigin(origins = "*")
 public class AccountSaleController {
     public final AccountSaleService accountSaleService;
 
