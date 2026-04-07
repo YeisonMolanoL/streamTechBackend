@@ -11,5 +11,6 @@ public class ClientRecord {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public long clientId;
     public String clientName;
+    @Column(unique = true)
     public String clientNumber;
 }

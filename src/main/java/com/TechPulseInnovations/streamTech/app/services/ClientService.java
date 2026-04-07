@@ -31,6 +31,11 @@ public class ClientService {
 
     public Number newClient(ClientRecord clientRecord){
         log.info("ClientService:: newClient -> clientRecord: [{}]", clientRecord);
+
+        if (this.clientRepository.findByClientNumber(clientRecord.clientNumber).isPresent()) {
+            throw new StreamTechException(i18NService.getMessage(ErrorMessages.CLIENT_ALREADY_EXIST));
+        }
+
         return this.clientRepository.save(clientRecord).clientId;
     }
 }
