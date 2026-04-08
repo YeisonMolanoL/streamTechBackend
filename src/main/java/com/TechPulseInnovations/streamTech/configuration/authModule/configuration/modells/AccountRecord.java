@@ -6,7 +6,10 @@ import lombok.Data;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "Account")
+@Table(name = "Account",
+        uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"accountEmail", "accountTypeRecord_account_type_id"})}
+)
 @Data
 public class AccountRecord {
     @Id

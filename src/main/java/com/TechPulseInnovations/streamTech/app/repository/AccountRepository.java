@@ -25,4 +25,5 @@ public interface AccountRepository extends JpaRepository<AccountRecord, Long> {
     Optional<AccountRecord> findFirstByAccountTypeRecordAndAccountDueDateAfterAndAccountAvailableProfilesGreaterThan(AccountTypeRecord accountTypeRecord, LocalDate currentDate, int availableProfiles);
     Optional<AccountRecord> findFirstByAccountTypeRecordAndAccountStatusSaleIsFalseAndAccountAvailableProfilesNotAndAccountDueDateAfterOrderByAccountDueDateAsc(AccountTypeRecord accountTypeRecord, int availableProfiles, LocalDate currentDate);
     Optional<AccountRecord> findByAccountEmail(String email);
+    Optional<AccountRecord> findByAccountEmailAndAccountTypeRecord_AccountTypeId(String email, long accountTypeId);
 }

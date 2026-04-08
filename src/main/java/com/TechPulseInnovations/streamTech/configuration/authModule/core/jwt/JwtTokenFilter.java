@@ -40,17 +40,41 @@ public class JwtTokenFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         try {
-        String token = getToken(request);
-        if(token != null && jwtProvider.validateToken(token)){
-            String userName = jwtProvider.getUserName(token);
-            UserDetails userDetails = userDetailService.loadUserByUsername(userName);
-            UsernamePasswordAuthenticationToken authenticationToken =
-                    new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-            SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+            String token = getToken(request);
+            if (token != null) {
+                // Log only partial token for debugging (avoid full token leaks)
+                String tokenHint = token.length() > 8 ? "****" + token.substring(token.length() - 8) : token;
+                logger.debug("JwtTokenFilter: token found (len={}), hint={}", token.length(), tokenHint);
+
+                if (jwtProvider == null) {
+                    logger.error("JwtTokenFilter: jwtProvider is null (injection failed?)");
+                }
+                if (userDetailService == null) {
+                    logger.error("JwtTokenFilter: userDetailService is null (injection failed?)");
+                }
+
+                boolean valid = false;
+                try {
+                    valid = jwtProvider != null && jwtProvider.validateToken(token);
+                } catch (Exception ex) {
+                    logger.error("JwtTokenFilter: error while validating token", ex);
+                }
+
+                if (valid) {
+                    String userName = jwtProvider.getUserName(token);
+                    logger.debug("JwtTokenFilter: token valid for user={}", userName);
+                    UserDetails userDetails = userDetailService.loadUserByUsername(userName);
+                    UsernamePasswordAuthenticationToken authenticationToken =
+                            new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                    SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+                } else {
+                    logger.warn("JwtTokenFilter: no valid token (proceeding without authentication)");
+                }
+            }
+        } catch (Exception e) {
+            logger.error("Fail in the method doFilterInternal", e);
+            throw e;
         }
-    }catch (Exception e){
-        logger.error("Fail in the method doFilterInternal " + e.getMessage());
-    }
         filterChain.doFilter(request, response);
     }
 }

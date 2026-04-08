@@ -3,6 +3,7 @@ package com.TechPulseInnovations.streamTech.app.services;
 import com.TechPulseInnovations.streamTech.configuration.authModule.configuration.modells.AccountRecord;
 import com.TechPulseInnovations.streamTech.configuration.authModule.configuration.modells.AccountTypeRecord;
 import com.TechPulseInnovations.streamTech.app.repository.AccountRepository;
+import com.TechPulseInnovations.streamTech.core.errorException.ErrorMessages;
 import com.TechPulseInnovations.streamTech.core.errorException.StreamTechException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -35,6 +36,10 @@ public class AccountService {
     @Transactional(rollbackFor = Exception.class)
     public AccountRecord createAccount(AccountRecord accountRecord, long accountTypeId){
         log.info("AccountService:: createAccount accountRecord: [{}] accountTypeId: [{}]", accountRecord, accountTypeId);
+        AccountRecord existAccount = getByEmailAndAccountTypeId(accountRecord.getAccountEmail(), accountTypeId);
+        if(existAccount != null){
+            throw new StreamTechException(i18NService.getMessage(ErrorMessages.ACCOUNT_ALREADY_EXIST, accountRecord.getAccountEmail()));
+        }
         AccountTypeRecord accountTypeRecord = this.accountTypeService.getAccountTypeById(accountTypeId);
         accountTypeRecord.setAccountTypeAvailableProfiles(accountTypeRecord.getAccountTypeAvailableProfiles() + accountTypeRecord.getAccountTypeAmountProfile());
         accountRecord.setAccountTypeRecord(this.accountTypeService.getAccountTypeById(accountTypeId));
@@ -173,5 +178,13 @@ public class AccountService {
         } else {
             imapManagerService.stopListeningForEmail(account.getAccountEmail());
         }
+    }
+
+    public AccountRecord getByEmailAndAccountTypeId(String email, long  accountTypeId){
+        Optional<AccountRecord> accountRecord = this.accountRepository.findByAccountEmailAndAccountTypeRecord_AccountTypeId(email, accountTypeId);
+        if(accountRecord.isPresent()){
+            return accountRecord.get();
+        }
+        return null;
     }
 }
