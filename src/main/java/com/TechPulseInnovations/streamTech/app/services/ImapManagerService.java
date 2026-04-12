@@ -20,6 +20,8 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import lombok.Builder;
+import lombok.Getter;
 
 /**
  * Servicio para manejar conexiones IMAP y escuchar correos entrantes
@@ -369,5 +371,106 @@ public class ImapManagerService {
     public boolean isEmailActive(String email) {
         Store store = activeStores.get(email);
         return store != null && store.isConnected();
+    }
+
+    /**
+     * Sincroniza el estado de los listeners con la BD
+     * Verifica que todos los activos en memoria estén activos en BD
+     * y que los inactivos en memoria no estén marcados como activos en BD
+     * 
+     * Resuelve inconsistencias causadas por:
+     * - Desconexiones no detectadas
+     * - Fallos parciales del sistema
+     * - States obsoletos en BD
+     */
+    public void syncListenerStateWithDatabase() {
+        log.info("░ Iniciando sincronización de estado de listeners con BD");
+
+        // 1. Verificar que cada listener en memoria realmente está conectado
+        activeStores.forEach((email, store) -> {
+            if (store == null || !store.isConnected()) {
+                log.warn("⚠ Store desconectado en memoria para: {}", email);
+                // Marcar como desconectado en BD
+                try {
+                    Optional<AccountRecord> accountOpt = accountRepository.findByAccountEmail(email);
+                    if (accountOpt.isPresent()) {
+                        AccountRecord account = accountOpt.get();
+                        account.setIsImapActive(false);
+                        account.setConnectionError("Desconexión detectada durante sincronización");
+                        accountRepository.save(account);
+                        log.info("Marcado como inactivo en BD: {}", email);
+                    }
+                } catch (Exception e) {
+                    log.error("Error sincronizando estado para {}: {}", email, e.getMessage());
+                }
+            }
+        });
+
+        // 2. Verificar límpieza de listeners muertos
+        cleanDeadListeners();
+
+        log.info("✓ Sincronización completada");
+    }
+
+    /**
+     * Limpia listeners que están en la BD como activos pero no existen en memoria
+     * Esto puede suceder si se fuerza un shutdown sin proper cleanup
+     */
+    private void cleanDeadListeners() {
+        List<AccountRecord> dbActiveAccounts = accountRepository.findByIsImapActiveTrue();
+        Set<String> memoryActive = activeStores.keySet();
+
+        for (AccountRecord account : dbActiveAccounts) {
+            String email = account.getAccountEmail();
+            if (!memoryActive.contains(email)) {
+                log.warn("⚠ Listener fantasma en BD: {} (no existe en memoria)", email);
+                try {
+                    account.setIsImapActive(false);
+                    account.setConnectionError("Listener no encontrado en memoria");
+                    accountRepository.save(account);
+                    log.info("Limpiado listener fantasma: {}", email);
+                } catch (Exception e) {
+                    log.error("Error limpiando listener fantasma {}: {}", email, e.getMessage());
+                }
+            }
+        }
+    }
+
+    /**
+     * Obtiene estadísticas de listeners para debug/monitoreo
+     */
+    public ListenerHealthStatus getListenerHealthStatus(String email) {
+        Store store = activeStores.get(email);
+        ImapListener listener = activeListeners.get(email);
+        Optional<AccountRecord> accountOpt = accountRepository.findByAccountEmail(email);
+
+        boolean storeConnected = store != null && store.isConnected();
+        boolean listenerExists = listener != null;
+        boolean dbMarkedActive = accountOpt.map(AccountRecord::getIsImapActive).orElse(false);
+
+        boolean isHealthy = storeConnected && listenerExists && dbMarkedActive;
+
+        return ListenerHealthStatus.builder()
+            .email(email)
+            .memoryStore(storeConnected)
+            .memoryListener(listenerExists)
+            .databaseMarked(dbMarkedActive)
+            .isHealthy(isHealthy)
+            .error(accountOpt.map(AccountRecord::getConnectionError).orElse(null))
+            .build();
+    }
+
+    /**
+     * DTO para estado de salud de un listener
+     */
+    @lombok.Builder
+    @lombok.Getter
+    public static class ListenerHealthStatus {
+        private final String email;
+        private final boolean memoryStore;      // ¿Store existe en memoria?
+        private final boolean memoryListener;   // ¿Listener existe en memoria?
+        private final boolean databaseMarked;   // ¿BD dice que está activo?
+        private final boolean isHealthy;        // ¿Todo sincronizado?
+        private final String error;             // Mensaje de error si existe
     }
 }

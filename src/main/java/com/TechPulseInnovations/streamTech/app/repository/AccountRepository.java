@@ -26,4 +26,10 @@ public interface AccountRepository extends JpaRepository<AccountRecord, Long> {
     Optional<AccountRecord> findFirstByAccountTypeRecordAndAccountStatusSaleIsFalseAndAccountAvailableProfilesNotAndAccountDueDateAfterOrderByAccountDueDateAsc(AccountTypeRecord accountTypeRecord, int availableProfiles, LocalDate currentDate);
     Optional<AccountRecord> findByAccountEmail(String email);
     Optional<AccountRecord> findByAccountEmailAndAccountTypeRecord_AccountTypeId(String email, long accountTypeId);
+    
+    /**
+     * Encuentra todas las cuentas que están marcadas como activas en IMAP
+     * Se usa al reiniciar la aplicación para sincronizar listeners
+     */
+    List<AccountRecord> findByIsImapActiveTrue();
 }
